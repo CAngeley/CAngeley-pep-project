@@ -38,7 +38,7 @@ public class SocialMediaController {
         app.post("/login", this::postLoginAccount);
         app.post("/messages", this::postNewMessage);
         app.get("/messages", this::getAllMessages);
-        app.get("/messages/{message_id}", this::getAllMessagesBy_id);
+        app.get("/messages/{message_id}", this::getMessageBy_id);
         return app;
     }
 
@@ -65,6 +65,7 @@ public class SocialMediaController {
         Account account = mapper.readValue(ctx.body(), Account.class);
         Account loginAccount = accountService.loginAccount(account);
         if(loginAccount != null){
+            ctx.json(mapper.writeValueAsString(loginAccount));
             ctx.status(200);
         } else {
             ctx.status(401);
@@ -98,9 +99,12 @@ public class SocialMediaController {
     /**
      * Handler to get all messages by id
      */
-    private void getAllMessagesBy_id(Context ctx) throws JsonProcessingException {
-        List<Message> messages = messageService.getAllMessagesBy_id();
-        ctx.json(messages);
+    private void getMessageBy_id(Context ctx) throws JsonProcessingException {
+        int message_id = (int)Long.parseLong(ctx.pathParam("message_id"));
+        Message message = messageService.getMessageBy_id(message_id);
+        if(message != null){
+            ctx.json(message);
+        }
         ctx.status(200);
     }
 }

@@ -21,7 +21,7 @@ public class AccountDAO {
                 preparedStatement.executeUpdate();
                 ResultSet pkey_rs = preparedStatement.getGeneratedKeys();
                 if(pkey_rs.next()){
-                    int generatedAccountId = (int) pkey_rs.getLong(1);
+                    int generatedAccountId = (int) pkey_rs.getLong("account_id");
                     return new Account(generatedAccountId, account.getUsername(), account.getPassword());
                 }
             }
@@ -38,12 +38,12 @@ public class AccountDAO {
         Connection connection = ConnectionUtil.getConnection();
         try {
             String sql = "SELECT account_id, username, password FROM Account WHERE username=(?) AND password=(?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, account.getUsername());
             preparedStatement.setString(2, account.getPassword());
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()){
-                return new Account(rs.getInt(1), rs.getString(2), rs.getString(3));
+                return new Account(rs.getInt("account_id"), rs.getString("username"), rs.getString("password"));
             }
         } catch (SQLException e){
             System.out.println(e.getMessage());

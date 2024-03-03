@@ -37,7 +37,7 @@ public class MessageDAO {
      */
     public boolean accountExists (Connection connection, Message message) throws SQLException{
         String sql = "SELECT message.posted_by, message.message_text, message.time_posted_epoch FROM account INNER JOIN message ON account.account_id = (?)";
-        PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setInt(1, message.getPosted_by());
         ResultSet rs = preparedStatement.executeQuery();
         if (rs.next()){
@@ -68,22 +68,21 @@ public class MessageDAO {
     }
     
     /**
-     * Returns all messages in the database by id
+     * Returns message in the database by id
      */
-    public List<Message> getAllMessagesBy_id() {
+    public Message getMessageBy_id(int message_id) {
         Connection connection = ConnectionUtil.getConnection();
-        List<Message> messages = new ArrayList<>();
         try {
-            String sql = "Select * from Message WHERE message_id";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql); 
+            String sql = "Select * from Message WHERE message_id = (?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, (int)message_id);
             ResultSet rs = preparedStatement.executeQuery();
-            while(rs.next()){
-                Message message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch"));
-                messages.add(message);
+            if (rs.next()){
+                return new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch"));
             }
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
-        return messages;
+        return null;
     }
 }
