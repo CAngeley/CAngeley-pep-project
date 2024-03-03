@@ -8,7 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessageDAO {
-    
+
+    /**
+     * Insert a message into the message table.
+     * Returns inserted message.
+     */
     public Message newMessage (Message message){
         Connection connection = ConnectionUtil.getConnection();
         try {
@@ -32,7 +36,7 @@ public class MessageDAO {
     }
 
     /**
-     * Checks if message_text is not empty and <= 255 characters
+     * Checks if message_text is not empty and <= 255 characters.
      */
     public boolean isMessageTextSatisfactory(Message message){
         if ((message.getMessage_text() != "") && (message.getMessage_text().length() <= 255)){
@@ -45,12 +49,11 @@ public class MessageDAO {
 
     /**
      * Checks if message.posted_by matches an account.account_id from account.
-     * True if select query is not empty
      */
     public boolean accountExists (Message message){
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "SELECT message.posted_by, message.message_text, message.time_posted_epoch FROM account INNER JOIN message ON account.account_id = (?)";
+            String sql = "SELECT message.posted_by, message.message_text, message.time_posted_epoch FROM Account INNER JOIN Message ON account.account_id = (?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, message.getPosted_by());
             ResultSet rs = preparedStatement.executeQuery();
@@ -66,7 +69,7 @@ public class MessageDAO {
     }
     
     /**
-     * Returns all messages in the database
+     * Returns all messages in the database.
      */
     public List<Message> getAllMessages() {
         Connection connection = ConnectionUtil.getConnection();
@@ -86,7 +89,7 @@ public class MessageDAO {
     }
     
     /**
-     * Returns message in the database by id
+     * Returns message in the database by message_id.
      */
     public Message getMessageBy_id(int message_id) {
         Connection connection = ConnectionUtil.getConnection();
@@ -105,15 +108,15 @@ public class MessageDAO {
     }
 
     /**
-     * Deletes message in the database by id
-     * Returns message in the database by id
+     * Deletes message in the database by message_id.
+     * Returns deleted message.
      */
     public Message deleteMessageBy_id(int message_id) {
         Connection connection = ConnectionUtil.getConnection();
         try {
             Message message = getMessageBy_id(message_id);
             if(message != null){
-                String sql = "DELETE FROM message WHERE message_id = (?)";
+                String sql = "DELETE FROM Message WHERE message_id = (?)";
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
                 preparedStatement.setInt(1, message_id);
                 preparedStatement.executeUpdate();
@@ -126,15 +129,15 @@ public class MessageDAO {
     }
 
     /**
-     * Updates a message by id
-     * Returns updated message in the database
+     * Updates a message by message_id.
+     * Returns updated message.
      */
     public Message patchMessageBy_id(int message_id, Message messageBody){
         Connection connection = ConnectionUtil.getConnection();
         try {
             Message message = getMessageBy_id(message_id);
             if(message != null && isMessageTextSatisfactory(messageBody)){
-                String sql = "UPDATE message SET message_text = (?) WHERE message_id = (?)";
+                String sql = "UPDATE Message SET message_text = (?) WHERE message_id = (?)";
                 PreparedStatement ps = connection.prepareStatement(sql);
                 ps.setString(1, messageBody.getMessage_text());
                 ps.setInt(2,message_id);

@@ -33,7 +33,6 @@ public class SocialMediaController {
      */
     public Javalin startAPI() {
         Javalin app = Javalin.create();
-        //app.get("example-endpoint", this::exampleHandler);
         app.post("/register", this::postNewAccount);
         app.post("/login", this::postLoginAccount);
         app.post("/messages", this::postNewMessage);
@@ -111,6 +110,9 @@ public class SocialMediaController {
         ctx.status(200);
     }
 
+    /**
+     * Handler to delete a Message by id
+     */
     private void deleteMessageBy_id(Context ctx) throws JsonProcessingException {
         int message_id = (int)Long.parseLong(ctx.pathParam("message_id"));
         Message message = messageService.deleteMessageBy_id(message_id);
@@ -120,6 +122,9 @@ public class SocialMediaController {
         ctx.status(200);
     }
 
+    /**
+     * Handler to update a message by id
+     */
     private void patchMessageBy_id(Context ctx) throws JsonProcessingException {
         int message_id = (int)Long.parseLong(ctx.pathParam("message_id"));
         Message messageFromBody = ctx.bodyAsClass(Message.class);
@@ -131,6 +136,9 @@ public class SocialMediaController {
         }
     }
 
+    /**
+     * Handler to get all messages by user
+     */
     private void getAllMessagesBy_user(Context ctx) throws JsonProcessingException{
         int posted_by = (int)Long.parseLong(ctx.pathParam("account_id"));
         List<Message> messages = messageService.getAllMessagesBy_user(posted_by);

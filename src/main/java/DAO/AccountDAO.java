@@ -9,6 +9,7 @@ public class AccountDAO {
 
     /**
      * Insert an account into the account table.
+     * Returns inserted account.
      */
     public Account insertAccount (Account account){
         Connection connection = ConnectionUtil.getConnection();
@@ -32,7 +33,8 @@ public class AccountDAO {
     }
 
     /**
-     * Login to an account
+     * Login to an account.
+     * Returns account that exists.
      */
     public Account loginAccount (Account account){
         Connection connection = ConnectionUtil.getConnection();
