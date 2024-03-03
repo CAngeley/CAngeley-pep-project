@@ -32,4 +32,12 @@ public class MessageService {
     public Message deleteMessageBy_id(int message_id){
         return messageDAO.getMessageBy_id(message_id);
     }
+
+    public Message patchMessageBy_id(int message_id, Message message){
+        return messageDAO.patchMessageBy_id(message_id, message);
+    }
+
+    public List<Message> getAllMessagesBy_user(int posted_by){
+        return messageDAO.getAllMessagesBy_user(posted_by);
+    }
 }

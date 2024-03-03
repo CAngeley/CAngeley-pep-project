@@ -39,7 +39,9 @@ public class SocialMediaController {
         app.post("/messages", this::postNewMessage);
         app.get("/messages", this::getAllMessages);
         app.get("/messages/{message_id}", this::getMessageBy_id);
-        app.delete("/messages/{message_id}",this::deleteMessageBy_id);
+        app.delete("/messages/{message_id}", this::deleteMessageBy_id);
+        app.patch("/messages/{message_id}", this::patchMessageBy_id);
+        app.get("/accounts/{account_id}/messages", this::getAllMessagesBy_user);
         return app;
     }
 
@@ -115,6 +117,24 @@ public class SocialMediaController {
         if(message != null){
             ctx.json(message);
         }
+        ctx.status(200);
+    }
+
+    private void patchMessageBy_id(Context ctx) throws JsonProcessingException {
+        int message_id = (int)Long.parseLong(ctx.pathParam("message_id"));
+        Message messageFromBody = ctx.bodyAsClass(Message.class);
+        Message message = messageService.patchMessageBy_id(message_id, messageFromBody);
+        if(message != null){
+            ctx.json(message).status(200);
+        } else {
+            ctx.status(400);
+        }
+    }
+
+    private void getAllMessagesBy_user(Context ctx) throws JsonProcessingException{
+        int posted_by = (int)Long.parseLong(ctx.pathParam("account_id"));
+        List<Message> messages = messageService.getAllMessagesBy_user(posted_by);
+        ctx.json(messages);
         ctx.status(200);
     }
 }

@@ -12,7 +12,7 @@ public class MessageDAO {
     public Message newMessage (Message message){
         Connection connection = ConnectionUtil.getConnection();
         try {
-            if ((accountExists(message)) && (message.getMessage_text() != "") && (message.getMessage_text().length() <= 255)){
+            if (accountExists(message) && isMessageTextSatisfactory(message)){
                 String sql = "INSERT INTO Message (posted_by, message_text, time_posted_epoch) VALUES (?,?,?)";
                 PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 preparedStatement.setInt(1, message.getPosted_by());
@@ -29,6 +29,18 @@ public class MessageDAO {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Checks if message_text is not empty and <= 255 characters
+     */
+    public boolean isMessageTextSatisfactory(Message message){
+        if ((message.getMessage_text() != "") && (message.getMessage_text().length() <= 255)){
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     /**
@@ -79,7 +91,7 @@ public class MessageDAO {
     public Message getMessageBy_id(int message_id) {
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "Select * from Message WHERE message_id = (?)";
+            String sql = "SELECT message_id, posted_by, message_text, time_posted_epoch FROM Message WHERE message_id = (?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, message_id);
             ResultSet rs = preparedStatement.executeQuery();
@@ -111,5 +123,48 @@ public class MessageDAO {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Updates a message by id
+     * Returns updated message in the database
+     */
+    public Message patchMessageBy_id(int message_id, Message messageBody){
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            Message message = getMessageBy_id(message_id);
+            if(message != null && isMessageTextSatisfactory(messageBody)){
+                String sql = "UPDATE message SET message_text = (?) WHERE message_id = (?)";
+                PreparedStatement ps = connection.prepareStatement(sql);
+                ps.setString(1, messageBody.getMessage_text());
+                ps.setInt(2,message_id);
+                ps.executeUpdate();
+                return new Message(message.getMessage_id(), message.getPosted_by(), messageBody.getMessage_text(), message.getTime_posted_epoch());
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    
+    /**
+     * Returns all messages in the database by posted_by
+     */
+    public List<Message> getAllMessagesBy_user(int posted_by){
+        Connection connection = ConnectionUtil.getConnection();
+        List<Message> messages = new ArrayList<>();
+        try {
+            String sql = "SELECT message_id, posted_by, message_text, time_posted_epoch FROM Message WHERE posted_by = (?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, posted_by);
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                Message message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch"));
+                messages.add(message);
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return messages;
     }
 }
