@@ -1,5 +1,14 @@
 package Controller;
 
+import java.util.List;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import Model.Account;
+import Model.Message;
+import Service.AccountService;
+import Service.MessageService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
@@ -9,6 +18,14 @@ import io.javalin.http.Context;
  * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
  */
 public class SocialMediaController {
+    AccountService accountService;
+    MessageService messageService;
+
+    public SocialMediaController(){
+        this.accountService = new AccountService();
+        this.messageService = new MessageService();
+    }
+
     /**
      * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test
      * suite must receive a Javalin object from this method.
@@ -16,18 +33,74 @@ public class SocialMediaController {
      */
     public Javalin startAPI() {
         Javalin app = Javalin.create();
-        app.get("example-endpoint", this::exampleHandler);
-
+        //app.get("example-endpoint", this::exampleHandler);
+        app.post("/register", this::postNewAccount);
+        app.post("/login", this::postLoginAccount);
+        app.post("/messages", this::postNewMessage);
+        app.get("/messages", this::getAllMessages);
+        app.get("/messages/{message_id}", this::getAllMessagesBy_id);
         return app;
     }
 
     /**
-     * This is an example handler for an example endpoint.
-     * @param context The Javalin Context object manages information about both the HTTP request and response.
+     * Handler to post a new Account.
      */
-    private void exampleHandler(Context context) {
-        context.json("sample text");
+    private void postNewAccount(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Account account = mapper.readValue(ctx.body(), Account.class);
+        Account addedAccount = accountService.addAccount(account);
+        if(addedAccount != null){
+            ctx.json(mapper.writeValueAsString(addedAccount));
+            ctx.status(200);
+        } else {
+            ctx.status(400);
+        }
     }
 
+    /**
+     * Handler to post a login Account.
+     */
+    private void postLoginAccount(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Account account = mapper.readValue(ctx.body(), Account.class);
+        Account loginAccount = accountService.loginAccount(account);
+        if(loginAccount != null){
+            ctx.status(200);
+        } else {
+            ctx.status(401);
+        }
+    }
 
+    /**
+     * Handler to post a new Message.
+     */
+    private void postNewMessage(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Message message = mapper.readValue(ctx.body(), Message.class);
+        Message newMessage = messageService.newMessage(message);
+        if(newMessage != null){
+            ctx.json(mapper.writeValueAsString(newMessage));
+            ctx.status(200);
+        } else {
+            ctx.status(400);
+        }
+    }
+
+    /**
+     * Handler to get all messages
+     */
+    private void getAllMessages(Context ctx) throws JsonProcessingException {
+        List<Message> messages = messageService.getAllMessages();
+        ctx.json(messages);
+        ctx.status(200);
+    }
+
+    /**
+     * Handler to get all messages by id
+     */
+    private void getAllMessagesBy_id(Context ctx) throws JsonProcessingException {
+        List<Message> messages = messageService.getAllMessagesBy_id();
+        ctx.json(messages);
+        ctx.status(200);
+    }
 }
