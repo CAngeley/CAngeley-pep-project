@@ -28,4 +28,8 @@ public class MessageService {
     public Message getMessageBy_id(int message_id){
         return messageDAO.getMessageBy_id(message_id);
     }
+
+    public Message deleteMessageBy_id(int message_id){
+        return messageDAO.getMessageBy_id(message_id);
+    }
 }
